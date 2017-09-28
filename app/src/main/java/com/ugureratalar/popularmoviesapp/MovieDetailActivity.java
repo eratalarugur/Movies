@@ -1,5 +1,6 @@
 package com.ugureratalar.popularmoviesapp;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Icon;
@@ -11,10 +12,12 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MovieDetailActivity extends AppCompatActivity {
+public class MovieDetailActivity extends Activity {
 
     @BindView(R.id.im_movie_detail)
     ImageView imMovieDetail;
@@ -36,10 +39,29 @@ public class MovieDetailActivity extends AppCompatActivity {
         movie = (Movie) bundle.getSerializable("movieSelected");
         String movieBackdropPath = "http://image.tmdb.org/t/p/w1000/"+movie.getBackdrop_path();
         Log.d("backDropImage: ", movieBackdropPath);
-        Picasso.with(this).load(movieBackdropPath).into(imMovieDetail);
+        if (isOnline()) { Picasso.with(this).load(movieBackdropPath).into(imMovieDetail); }
 
         tvMovieDescription.setText(movie.getOverview());
-        tvMovieTitle.setText(movie.getTitle());
+        tvMovieTitle.setText(movie.getTitle() + "  ("+getRelaseYear(movie.getReleaseDate())+")");
+    }
 
+    String getRelaseYear (String releaseDate) {
+        String[] seperatedDate = releaseDate.split("-");
+        return seperatedDate[0];
+    }
+
+    public boolean isOnline() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int exitValue = ipProcess.waitFor();
+            return (exitValue == 0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }

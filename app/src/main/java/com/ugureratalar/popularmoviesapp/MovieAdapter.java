@@ -22,6 +22,8 @@ import java.util.List;
  * Created by u. on 17/09/2017.
  */
 
+
+
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieInfoViewHolder> {
 
     Movie movieSelected;

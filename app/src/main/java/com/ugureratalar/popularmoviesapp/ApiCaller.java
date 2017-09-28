@@ -18,7 +18,6 @@ public interface ApiCaller {
     @GET("/3/movie/{sortType}")
     Call<MovieInfo> movieList (@Path("sortType") String sortType,
                                   @Query("api_key") String apiKey,
-                                  @Query("page") String page,
                                   @Query("language") String language);
 
 

@@ -18,7 +18,7 @@ public class Movie implements Serializable {
     public String overview;
     public String popularity;
     public String voteAverage;
-    public String releaseDate;
+    public String release_date;
     public String poster_path;
 
     public String getBackdrop_path() {
@@ -73,11 +73,11 @@ public class Movie implements Serializable {
     }
 
     public String getReleaseDate() {
-        return releaseDate;
+        return release_date;
     }
 
     public void setReleaseDate(String releaseDate) {
-        this.releaseDate = releaseDate;
+        this.release_date = release_date;
     }
 
     public String getPoster_path() {

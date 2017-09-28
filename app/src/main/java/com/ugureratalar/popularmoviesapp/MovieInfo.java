@@ -1,5 +1,6 @@
 package com.ugureratalar.popularmoviesapp;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -8,6 +9,6 @@ import java.util.List;
 
 public class MovieInfo {
 
-    public List <Movie> results;
+    public ArrayList<Movie> results;
 
 }

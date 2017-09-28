@@ -1,6 +1,8 @@
 package com.ugureratalar.popularmoviesapp;
 
+import android.content.DialogInterface;
 import android.net.Uri;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -8,8 +10,14 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.GridView;
+import android.widget.Toast;
 
 import com.google.gson.Gson;
+
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -33,26 +41,33 @@ public class MainActivity extends AppCompatActivity {
     private static final String BASE_URL = "https://api.themoviedb.org";
     private static final String LANGUAGE = "en-US";
     private static final int CACHE_SIZE = 20;
-    private int page = 1;
     private MovieAdapter movieAdapter;
     private RecyclerView mRecylerView;
     private MovieInfo  movieListFromApiCall;
-
+    private GridView gridView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mRecylerView = (RecyclerView)findViewById(R.id.popular_movies);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        mRecylerView.setLayoutManager(layoutManager);
-        mRecylerView.setHasFixedSize(false);
-        mRecylerView.setItemViewCacheSize(CACHE_SIZE);
-        movieAdapter = new MovieAdapter(this);
+        gridView = (GridView)findViewById(R.id.popular_movies_gridView);
+        checkConnection();
+    }
 
-        mRecylerView.setAdapter(movieAdapter);
-
-        getMovieList(POPULAR);
+    private void checkConnection() {
+        if(isOnline()) {
+            getMovieList(POPULAR);
+        } else {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Please check your internet connection!")
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            checkConnection();
+                        }
+                    });
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
     }
 
 //    HttpLoggingInterceptor logging = new HttpLoggingInterceptor(new Logger() {
@@ -60,6 +75,21 @@ public class MainActivity extends AppCompatActivity {
 //            Log.d("Retrofit",message);
 //        }
 //    });
+
+    public boolean isOnline() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int exitValue = ipProcess.waitFor();
+            return (exitValue == 0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
 
     void getMovieList(String sortType) {
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
@@ -78,20 +108,20 @@ public class MainActivity extends AppCompatActivity {
 
         ApiCaller service = retrofit.create(ApiCaller.class);
 
-        Call<MovieInfo> call = service.movieList(sortType, API_KEY, String.valueOf(page), LANGUAGE);
+        Call<MovieInfo> call = service.movieList(sortType, API_KEY, LANGUAGE);
         call.enqueue(new Callback<MovieInfo>() {
             @Override
             public void onResponse(Call<MovieInfo> call, Response<MovieInfo> response) {
                 movieListFromApiCall = response.body();
                 Log.d("myLog", movieListFromApiCall.results.get(0).getTitle());
-                movieAdapter.setMovies(movieListFromApiCall.results);
-                movieAdapter.notifyDataSetChanged();
+
+                gridView.setAdapter(new MovieGridAdapter(MainActivity.this, movieListFromApiCall.results));
+
 
             }
 
             @Override
             public void onFailure(Call<MovieInfo> call, Throwable t) {
-
             }
         });
     }
