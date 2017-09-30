@@ -52,7 +52,6 @@ public class MovieGridAdapter extends BaseAdapter {
 
         final Context context = viewGroup.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
-
         View view = inflater.inflate(R.layout.movie_list_item, viewGroup, false);
         final Movie movie = movies.get(position);
 
@@ -61,7 +60,9 @@ public class MovieGridAdapter extends BaseAdapter {
 
         String movieUrl = "http://image.tmdb.org/t/p/w500/" + movie.getPoster_path();
 
-        if (isOnline()) { Picasso.with(context).load(movieUrl).into(ivImage); }
+        if (isOnline()) {
+            Picasso.with(context).load(movieUrl).into(ivImage);
+        }
 
         view.setOnClickListener(new View.OnClickListener() {
             @Override

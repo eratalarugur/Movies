@@ -1,29 +1,18 @@
 package com.ugureratalar.popularmoviesapp;
 
 import android.content.DialogInterface;
-import android.net.Uri;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.Toast;
-
-import com.google.gson.Gson;
+import android.widget.ProgressBar;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.Logger;
-
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
@@ -35,34 +24,35 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String API_KEY = "8cead25b70b2f6a9107a688f984efef0";
+    private static final String API_KEY = "";
     private static final String POPULAR = "popular";
     private static final String TOP_RATED = "top_rated";
     private static final String BASE_URL = "https://api.themoviedb.org";
     private static final String LANGUAGE = "en-US";
     private static final int CACHE_SIZE = 20;
-    private MovieAdapter movieAdapter;
-    private RecyclerView mRecylerView;
+    private MovieGridAdapter movieAdapter;
     private MovieInfo  movieListFromApiCall;
     private GridView gridView;
+    private ProgressBar progressHud;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        progressHud = (ProgressBar)findViewById(R.id.indeterminateBar);
         gridView = (GridView)findViewById(R.id.popular_movies_gridView);
-        checkConnection();
+        checkConnection(POPULAR);
     }
 
-    private void checkConnection() {
+    private void checkConnection(final String movieListType) {
         if(isOnline()) {
-            getMovieList(POPULAR);
+            progressHud.setVisibility(View.VISIBLE);
+            getMovieList(movieListType);
         } else {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage("Please check your internet connection!")
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    .setPositiveButton("Retry", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            checkConnection();
+                            checkConnection(movieListType);
                         }
                     });
             AlertDialog alert = builder.create();
@@ -114,14 +104,14 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<MovieInfo> call, Response<MovieInfo> response) {
                 movieListFromApiCall = response.body();
                 Log.d("myLog", movieListFromApiCall.results.get(0).getTitle());
-
-                gridView.setAdapter(new MovieGridAdapter(MainActivity.this, movieListFromApiCall.results));
-
-
+                movieAdapter = new MovieGridAdapter(MainActivity.this, movieListFromApiCall.results);
+                gridView.setAdapter(movieAdapter);
+                progressHud.setVisibility(View.INVISIBLE);
             }
 
             @Override
             public void onFailure(Call<MovieInfo> call, Throwable t) {
+                progressHud.setVisibility(View.INVISIBLE);
             }
         });
     }
@@ -139,11 +129,11 @@ public class MainActivity extends AppCompatActivity {
 
         switch (item.getItemId()) {
             case R.id.popular:
-                getMovieList("popular");
+                checkConnection(POPULAR);
                 break;
 
             case R.id.top_rated:
-                getMovieList("top_rated");
+                checkConnection(TOP_RATED);
                 break;
         }
         return super.onOptionsItemSelected(item);
