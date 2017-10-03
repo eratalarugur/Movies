@@ -4,7 +4,6 @@ import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,7 +23,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String API_KEY = "";
+    private static final String API_KEY = BuildConfig.API_KEY;
     private static final String POPULAR = "popular";
     private static final String TOP_RATED = "top_rated";
     private static final String BASE_URL = "https://api.themoviedb.org";
@@ -44,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkConnection(final String movieListType) {
-        if(isOnline()) {
+        if(Utils.checkInternetConnection(MainActivity.this)) {
             progressHud.setVisibility(View.VISIBLE);
             getMovieList(movieListType);
         } else {
