@@ -16,8 +16,12 @@ public class Utils {
     public static boolean checkInternetConnection(Context context) {
 
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivityManager.getActiveNetworkInfo().isConnected() && connectivityManager.getActiveNetworkInfo().isAvailable() && connectivityManager.getActiveNetworkInfo() != null) {
-            return true;
+        if (connectivityManager.getActiveNetworkInfo() != null) {
+            if (connectivityManager.getActiveNetworkInfo().isConnected() && connectivityManager.getActiveNetworkInfo().isAvailable()) {
+                return true;
+            } else {
+                return false;
+            }
         } else {
             return false;
         }
